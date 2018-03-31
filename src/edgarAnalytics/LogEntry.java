@@ -72,8 +72,9 @@ public class LogEntry {
         datetime.setLenient(false);
         
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ENGLISH);
+        sdf.setLenient(false);
+        
         datetime.setTime(sdf.parse(fields[positions.get("date")] + " " + fields[positions.get("time")]));
-        datetime.getTime();
         
         return (Calendar) datetime.clone();
     }
