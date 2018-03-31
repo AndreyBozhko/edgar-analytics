@@ -45,21 +45,23 @@ public class ActiveSessions {
      */
     public void add(LogEntry entry)
     {
+        String ip = entry.getIP();
+        
         // if user is still active
-        if (user_sessions.containsKey(entry.getIP()))
+        if (user_sessions.containsKey(ip))
         {
             // update his last event timestamp
-            ActiveUser existing_user = new ActiveUser(entry.getIP(),
-                    user_sessions.get(entry.getIP()).getEndTime());
+            
+            ActiveUser existing_user = new ActiveUser(ip, user_sessions.get(ip).getEndTime());
             active_users.remove(existing_user);
             
             // and process new webpage request
-            user_sessions.get(entry.getIP()).addVisitedWebpage(entry);
+            user_sessions.get(ip).addVisitedWebpage(entry);
         }
         else
         {
             // otherwise start a new session record
-            user_sessions.put(entry.getIP(), new Session(entry));
+            user_sessions.put(ip, new Session(entry));
         }
 
         active_users.add(new ActiveUser(entry));
