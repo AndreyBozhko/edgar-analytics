@@ -12,7 +12,7 @@ public class ActiveSessions {
     private final int inact_time;
     private Calendar  current;
     
-    private TreeSet<ActiveUser>   active_users;
+    private TreeSet<ActiveUser>         active_users;
     private final Map<String, Session>  user_sessions;
     
             
