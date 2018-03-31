@@ -1,1 +1,1 @@
-This is the directory where your source code would reside.
+This is the directory with the source code for the package `edgarAnalytics`.
