@@ -1,1 +1,1 @@
-This directory is where we would expect your program to write the requested output files.
+The directory where the program creates the output file `sessionization.txt`.
