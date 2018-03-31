@@ -9,7 +9,7 @@ The script `run.sh` compiles and executes the project; the two input data files 
 
 
 ## Algorithm overview
-The algorithm successively reads data entries from the input file `log.csv.txt` line by line, parsing each line after it is read, adding the new data to the data structures that allow efficient computation of the required statistics, and generating the corresponding output line. The memory requirement of the algorithm is **O(N)**. In the worst case **N** is the total number of entries scanned so far, and all of them will need to be stored until the input file ends.
+The algorithm successively reads data entries from the input file `log.csv` line by line, parsing each line after it is read, adding the new data to the data structures that allow efficient computation of the required statistics, and generating the corresponding output line. The memory requirement of the algorithm is **O(N)**. In the worst case **N** is the total number of entries scanned so far, and all of them will need to be stored until the input file ends.
 
 The data structure used ???
 
