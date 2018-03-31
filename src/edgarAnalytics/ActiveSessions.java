@@ -51,7 +51,6 @@ public class ActiveSessions {
         if (user_sessions.containsKey(ip))
         {
             // update his last event timestamp
-            
             ActiveUser existing_user = new ActiveUser(ip, user_sessions.get(ip).getEndTime());
             active_users.remove(existing_user);
             
