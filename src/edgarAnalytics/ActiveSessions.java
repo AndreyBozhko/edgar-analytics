@@ -64,7 +64,7 @@ public class ActiveSessions {
         {
             // remove user info in order to update it
             active_users.get(Order.BY_LAST)
-                        .remove(new Tuple<>(sess.getEndTime(), sess.getEntryNumber()));
+                        .remove(getUniqueSessionID(sess, Order.BY_LAST));
             
             // process new webpage request
             sess.addVisitedWebpage(entry);
@@ -73,12 +73,12 @@ public class ActiveSessions {
         {
             // add user event into the collection with ordering BY_FIRST
             active_users.get(Order.BY_FIRST)
-                        .put(new Tuple<>(sess.getStartTime(), sess.getEntryNumber()), ip);
+                        .put(getUniqueSessionID(sess, Order.BY_FIRST), ip);
         }
        
         // add user event into the collection with ordering BY_LAST
         active_users.get(Order.BY_LAST)
-                    .put(new Tuple<>(sess.getEndTime(), sess.getEntryNumber()), ip);
+                    .put(getUniqueSessionID(sess, Order.BY_LAST), ip);
     }
     
     
@@ -120,17 +120,14 @@ public class ActiveSessions {
         Session sess   = user_sessions.get(ip);
         
         int count      = sess.getWebpageCount();
-        int entry_num  = sess.getEntryNumber();
         Calendar start = sess.getStartTime();
         Calendar end   = sess.getEndTime();
         int duration   = getDuration(start, end);
         
         
         // remove user from active sessions collection
-        active_users.get(Order.BY_FIRST)
-                    .remove(new Tuple<>(start, entry_num));
-        active_users.get(Order.BY_LAST)
-                    .remove(new Tuple<>(end,   entry_num));
+        for (Order o : Order.values())
+            active_users.get(o).remove(getUniqueSessionID(sess, o));
         
         user_sessions.remove(ip);
         
@@ -171,4 +168,26 @@ public class ActiveSessions {
     private static int getDuration(Calendar c1, Calendar c2)
     { return (int) Math.abs(c1.getTimeInMillis() - c2.getTimeInMillis()) / 1000; }
 
+    
+    
+    /**
+     * Returns unique session id consisting of timestamp of first or last (depending on order)
+     * user's activity during the session and unique user's request id 
+     * @param sess user's session
+     * @param order determines which timestamp to use, first or last
+     * @return unique session id
+     */
+    private static Tuple<Calendar, Integer> getUniqueSessionID(Session sess, Order order)
+    {
+        switch (order)
+        {
+        case BY_FIRST:
+            return new Tuple<>(sess.getStartTime(), sess.getEntryNumber());
+        case BY_LAST:
+            return new Tuple<>(sess.getEndTime(),   sess.getEntryNumber());
+        default:
+            return null;
+        }
+    }
+    
 }
