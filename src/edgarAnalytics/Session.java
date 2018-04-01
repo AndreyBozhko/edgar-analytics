@@ -90,6 +90,7 @@ public class Session {
     
     
     /**
+     * Returns comma-separated information about the session. 
      * Overrides method {@code toString}
      */
     @Override
