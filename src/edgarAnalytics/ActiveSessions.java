@@ -17,7 +17,7 @@ public class ActiveSessions {
     private final Map<Order, 
                       TreeMap<Tuple<Calendar, Integer>, String>> active_users;
     
-    protected static enum Order {BY_FIRST, BY_LAST};
+    public static enum Order {BY_FIRST, BY_LAST};
     
             
     
