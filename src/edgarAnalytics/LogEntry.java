@@ -23,7 +23,8 @@ public class LogEntry {
     
     
     /**
-     * Constructor that parses data from the string passed to it
+     * Constructor that parses data from the string passed to it.
+     * Checks if ip is not empty
      * @param line single line from the input file
      * @throws Exception
      */
@@ -32,6 +33,8 @@ public class LogEntry {
         fields = line.split(",", -1);
         
         ip = parseIP();
+        if (ip.equals("")) throw new Exception();
+        
         datetime = parseDateTime();
         webpage = parseWebpage();
         
