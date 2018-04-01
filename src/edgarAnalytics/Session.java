@@ -69,27 +69,11 @@ public class Session {
     
     
     
+    /**
+     * Returns number of the entry that corresponds to the first user event in the current session
+     * @return entry number
+     */
     public int getEntryNumber()
     { return firstentry; }
-    
-//    
-//    
-//    /**
-//     * Returns unique session identifier that consists of timestamp of user's last activity
-//     * and entry number that started the session
-//     * @return (last timestamp, first number) tuple
-//     */
-//    public Tuple<Calendar, Integer> getUniqueTupleStart()
-//    { return new Tuple<>(getStartTime(), firstentry); }
-//    
-//    
-//    
-//    /**
-//     * Returns unique session identifier that consists of timestamp of user's last activity
-//     * and entry number that started the session
-//     * @return (last timestamp, first number) tuple
-//     */
-//    public Tuple<Calendar, Integer> getUniqueTupleEnd()
-//    { return new Tuple<>(getEndTime(), firstentry); }
-//    
+
 }
