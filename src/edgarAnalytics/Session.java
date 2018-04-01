@@ -1,6 +1,7 @@
 package edgarAnalytics;
 
 import java.util.*;
+import java.text.SimpleDateFormat;
 
 
 
@@ -61,19 +62,48 @@ public class Session {
     
     
     /**
-     * Returns total webpage count during the session
-     * @return webpage count
-     */
-    public int getWebpageCount()
-    { return count; }
-    
-    
-    
-    /**
      * Returns number of the entry that corresponds to the first user event in the current session
      * @return entry number
      */
     public int getEntryNumber()
     { return firstentry; }
 
+    
+    
+    /**
+     * Method that calculates time period in seconds between the given timestamp and last user's activity timestamp
+     * @param currrent current timestamp
+     * @return period between timestamps
+     */
+    public int getDuration(Calendar current)
+    { return (int) Math.abs(current.getTimeInMillis() - end.getTimeInMillis()) / 1000; }
+    
+    
+    
+    /**
+     * Method that calculates the duration of the session
+     * @return duration of session
+     */
+    public int getDuration()
+    { return getDuration(start); }
+    
+    
+    
+    /**
+     * Overrides method {@code toString}
+     */
+    @Override
+    public String toString()
+    {
+        StringJoiner output  = new StringJoiner(",");
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        
+        output.add(sdf.format(start.getTime()))
+              .add(sdf.format(end.getTime()))
+              .add(Integer.toString(getDuration() + 1))
+              .add(Integer.toString(count));
+        
+        return output.toString();
+    }
+    
 }
