@@ -52,6 +52,8 @@ public class ActiveSessions {
     public void add(LogEntry entry)
     {
         String ip = entry.getIP();
+        
+        // start a new session record if necessary
         boolean flag = user_sessions.containsKey(ip);
         user_sessions.putIfAbsent(ip, new Session(entry));
         
@@ -68,11 +70,7 @@ public class ActiveSessions {
         }
         else
         {
-            // otherwise start a new session record
-            // user_sessions.put(ip, new Session(entry));
-            
             // add user event into the collection with ordering BY_FIRST
-            // sess = user_sessions.get(ip);
             active_users.get(Order.BY_FIRST)
                         .put(new Tuple<>(sess.getStartTime(), sess.getEntryNumber()), ip);
         }
@@ -89,9 +87,7 @@ public class ActiveSessions {
      * @return {@code true} if there still are sessions to finalize
      */
     public boolean hasSessions()
-    {
-        return (!user_sessions.isEmpty());
-    }
+    { return (!user_sessions.isEmpty()); }
     
     
     
@@ -119,20 +115,21 @@ public class ActiveSessions {
     {
         // get session info
         String ip = active_users.get(order).firstEntry().getValue();
+
+        Session sess   = user_sessions.get(ip);
         
-        int count      = user_sessions.get(ip).getWebpageCount();
-        Calendar start = user_sessions.get(ip).getStartTime();
-        Calendar end   = user_sessions.get(ip).getEndTime();
+        int count      = sess.getWebpageCount();
+        int entry_num  = sess.getEntryNumber();
+        Calendar start = sess.getStartTime();
+        Calendar end   = sess.getEndTime();
         int duration   = getDuration(start, end);
         
         
         // remove user from active sessions collection
-        Session sess = user_sessions.get(ip);
-        
         active_users.get(Order.BY_FIRST)
-                    .remove(new Tuple<>(sess.getStartTime(), sess.getEntryNumber()));
+                    .remove(new Tuple<>(start, entry_num));
         active_users.get(Order.BY_LAST)
-                    .remove(new Tuple<>(sess.getEndTime(),   sess.getEntryNumber()));
+                    .remove(new Tuple<>(end,   entry_num));
         
         user_sessions.remove(ip);
         
