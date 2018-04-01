@@ -97,9 +97,6 @@ public class Main {
      * Method that reads the input file, processes EDGAR entries and outputs user sessions statistics into the output file
      * @throws Exception if files not found
      */
-    /**
-     * @throws Exception
-     */
     public void performEdgarAnalysis() throws Exception
     {
         // initialize reader and writer
