@@ -1,6 +1,7 @@
 package edgarAnalytics;
 
 import java.util.*;
+import java.text.SimpleDateFormat;
 
 
 
@@ -155,20 +156,8 @@ public class ActiveSessions {
      */
     private static String calendarToString(Calendar cal)
     {
-        StringJoiner time = new StringJoiner("");
-        time.add(Integer.toString(cal.get(Calendar.YEAR)))
-            .add("-")
-            .add(String.format("%02d", cal.get(Calendar.MONTH) + 1))
-            .add("-")
-            .add(String.format("%02d", cal.get(Calendar.DAY_OF_MONTH)))
-            .add(" ")
-            .add(String.format("%02d", cal.get(Calendar.HOUR_OF_DAY)))
-            .add(":")
-            .add(String.format("%02d", cal.get(Calendar.MINUTE)))
-            .add(":")
-            .add(String.format("%02d", cal.get(Calendar.SECOND)));
-        
-        return time.toString();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        return sdf.format(cal.getTime());
     }
     
     
