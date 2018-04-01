@@ -13,6 +13,8 @@ The algorithm successively reads data entries from the input file `log.csv` line
 
 The data structures used are the `HashMap` that maps user's `ip` to the active session record that keepd the statistics, and two `TreeMap` instances that map the unique id of user's request to `ip`. The unique id is a tuple of `Calendar timestamp` and `Integer entry_num`, with the natural ordering by `timestamp` first, and then by `entry_num`. The two treemaps serve as priority queues that are being polled for the next user's ip whose session is to be deemed expired. The first is used when a session expires before the input file ends, so `timestamp` is the date and time of the last user activity during the session. The second is used when all remaining sessions expire because the input file ends, and `timestamp` corresponds to first user activity during the session.
 
+The operations with `HashMap` take amortized **O(1)** time, and the **O(log(N))** time is required for `TreeMap` for its methods `put()`, `remove()` and `firstEntry()`. Overall, the algorithm's complexity is **O(N log(N))**, where **N** can be as large as the size of the input.
+
 
 ## Assumptions
 As for the main algorithm body, I assumed that input will not be extremely large so that all the processed data may be stored in the RAM.
