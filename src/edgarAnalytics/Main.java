@@ -80,20 +80,6 @@ public class Main {
     
     
     /**
-     * Helper method that writes the output line into the file
-     * @param writer BufferedWriter that writes into file
-     * @param output output line
-     * @throws Exception if I/O error occurs
-     */
-    private static void writeToOutput(BufferedWriter writer, String output) throws Exception
-    {
-        writer.write(output);
-        writer.newLine();
-    }
-    
-    
-        
-    /**
      * Method that reads the input file, processes EDGAR entries and outputs user sessions statistics into the output file
      * @throws Exception if files not found
      */
@@ -115,7 +101,10 @@ public class Main {
             
             // end all sessions that have expired
             while (user_sessions.hasExpiredSessions())
-                writeToOutput(writer, user_sessions.closeSession(ActiveSessions.Order.BY_LAST));
+            {
+                writer.write(user_sessions.closeSession(ActiveSessions.Order.BY_LAST));
+                writer.newLine();
+            }
             
             // add new entry for processing
             user_sessions.add(entry);
@@ -123,7 +112,10 @@ public class Main {
         
         // end all remaining sessions
         while (user_sessions.hasSessions())
-            writeToOutput(writer, user_sessions.closeSession(ActiveSessions.Order.BY_FIRST));
+        {
+            writer.write(user_sessions.closeSession(ActiveSessions.Order.BY_FIRST));
+            writer.newLine();
+        }
         
         // close input and output files
         reader.close();
