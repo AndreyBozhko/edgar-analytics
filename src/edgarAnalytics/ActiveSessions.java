@@ -59,6 +59,7 @@ public class ActiveSessions {
         user_sessions.putIfAbsent(ip, new Session(entry));
         
         Session sess = user_sessions.get(ip);
+        
         // if user is still active
         if (flag)
         {
