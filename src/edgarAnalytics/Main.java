@@ -125,7 +125,7 @@ public class Main {
         }
         
         // end all remaining sessions
-        while (user_sessions.hasSessionsToFinalize())
+        while (user_sessions.hasSessions())
             writeToOutput(writer, user_sessions.closeSession(ActiveSessions.Order.BY_FIRST));
         
         // close input and output files
@@ -142,8 +142,24 @@ public class Main {
      */
     public static void main(String[] args) throws Exception
     {
-        Main solver = new Main(args[0], args[1], args[2]);
-        solver.performEdgarAnalysis();
+//        Main solver = new Main(args[0], args[1], args[2]);
+//        try
+//        {
+            Main solver = new Main("tests\\test_3\\input\\log.csv", 
+                                   "tests\\test_3\\input\\inactivity_period.txt", 
+                                   "tests\\test_3\\output\\sessionization1.txt");
+
+            long startTime = System.nanoTime();
+            solver.performEdgarAnalysis();
+            long endTime = System.nanoTime();
+
+            double duration = (endTime - startTime) / Math.pow(10.0, 9.0);
+            System.out.println(Double.toString(duration) + " seconds");
+
+            System.out.println(Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory());
+//        }
+//        catch (Exception e) { System.out.println("EXCEPTION"); }
+        
     }
 
 }

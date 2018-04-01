@@ -12,10 +12,11 @@ public class ActiveSessions {
     private final int inact_time;
     private Calendar  current;
     
-    private final Map<Order, TreeSet<ActiveUser>> active_users;
-    private final Map<String, Session>            user_sessions;
+    private final Map<String, Session> user_sessions;
+    private final Map<Order, 
+                      TreeMap<Tuple<Calendar, Integer>, String>> active_users;
     
-    public static enum Order {BY_FIRST, BY_LAST};
+    protected static enum Order {BY_FIRST, BY_LAST};
     
             
     
@@ -30,7 +31,7 @@ public class ActiveSessions {
         active_users  = new HashMap<>();
         
         for (Order o : Order.values())
-            active_users.put(o, new TreeSet<>());
+            active_users.put(o, new TreeMap<>());
     }
     
     
@@ -50,25 +51,35 @@ public class ActiveSessions {
      */
     public void add(LogEntry entry)
     {
+        String ip = entry.getIP();
+        boolean flag = user_sessions.containsKey(ip);
+        user_sessions.putIfAbsent(ip, new Session(entry));
+        
+        Session sess = user_sessions.get(ip);
         // if user is still active
-        if (user_sessions.containsKey(entry.getIP()))
+        if (flag)
         {
+            // remove user info in order to update it
+            active_users.get(Order.BY_LAST)
+                        .remove(new Tuple<>(sess.getEndTime(), sess.getEntryNumber()));
+            
             // process new webpage request
-            user_sessions.get(entry.getIP()).addVisitedWebpage(entry);
+            sess.addVisitedWebpage(entry);
         }
         else
         {
             // otherwise start a new session record
-            user_sessions.put(entry.getIP(), new Session(entry));
+            // user_sessions.put(ip, new Session(entry));
             
-            // add user event into the collection that would contain data about user's first event, sorted by date
-            // also, some redundant event data may be added
-            active_users.get(Order.BY_FIRST).add(new ActiveUser(entry));
+            // add user event into the collection with ordering BY_FIRST
+            // sess = user_sessions.get(ip);
+            active_users.get(Order.BY_FIRST)
+                        .put(new Tuple<>(sess.getStartTime(), sess.getEntryNumber()), ip);
         }
-        
-        // add user event into the collection that would contain data about user's last event, sorted by date
-        // also, some redundant event data may be added
-        active_users.get(Order.BY_LAST).add(new ActiveUser(entry));
+       
+        // add user event into the collection with ordering BY_LAST
+        active_users.get(Order.BY_LAST)
+                    .put(new Tuple<>(sess.getEndTime(), sess.getEntryNumber()), ip);
     }
     
     
@@ -77,13 +88,9 @@ public class ActiveSessions {
      * Returns true if not all the sessions are finalized after the input file ends
      * @return {@code true} if there still are sessions to finalize
      */
-    public boolean hasSessionsToFinalize()
+    public boolean hasSessions()
     {
-        if (user_sessions.isEmpty()) return false;
-        
-        getNextUser(Order.BY_FIRST);
-        
-        return (!active_users.get(Order.BY_FIRST).isEmpty());
+        return (!user_sessions.isEmpty());
     }
     
     
@@ -96,32 +103,8 @@ public class ActiveSessions {
     {
         if (user_sessions.isEmpty()) return false;
         
-        ActiveUser user = getNextUser(Order.BY_LAST);
-        
-        return (getDuration(current, user.getTime()) > inact_time);
-    }
-    
-    
-    
-    /**
-     * Finds next valid user whose session is to be finalized
-     * @param order referes to collection from which user is to be selected
-     * @return user
-     */
-    private ActiveUser getNextUser(Order order)
-    {
-        ActiveUser user = active_users.get(order).first();
-        
-        while (!(user_sessions.containsKey(user.getIP())
-                && user_sessions.get(user.getIP())
-                                .getEntryNumbers()[order.ordinal()]
-                                 == user.getNumber()))
-        {
-            active_users.get(order).pollFirst();
-            user = active_users.get(order).first();
-        }
-        
-        return user;
+        String ip = active_users.get(Order.BY_LAST).firstEntry().getValue();
+        return (getDuration(current, user_sessions.get(ip).getEndTime()) > inact_time);
     }
     
     
@@ -135,16 +118,24 @@ public class ActiveSessions {
     public String closeSession(Order order)
     {
         // get session info
-        ActiveUser user = active_users.get(order).pollFirst();
-        String ip = user.getIP();
+        String ip = active_users.get(order).firstEntry().getValue();
         
+        int count      = user_sessions.get(ip).getWebpageCount();
         Calendar start = user_sessions.get(ip).getStartTime();
         Calendar end   = user_sessions.get(ip).getEndTime();
         int duration   = getDuration(start, end);
-        int count      = user_sessions.get(ip).getWebpageCount();
+        
         
         // remove user from active sessions collection
+        Session sess = user_sessions.get(ip);
+        
+        active_users.get(Order.BY_FIRST)
+                    .remove(new Tuple<>(sess.getStartTime(), sess.getEntryNumber()));
+        active_users.get(Order.BY_LAST)
+                    .remove(new Tuple<>(sess.getEndTime(),   sess.getEntryNumber()));
+        
         user_sessions.remove(ip);
+        
         
         // create output string
         StringJoiner output = new StringJoiner(",");

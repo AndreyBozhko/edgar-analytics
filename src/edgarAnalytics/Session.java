@@ -10,7 +10,7 @@ import java.util.*;
 public class Session {
 
     private Calendar start, end;
-    private int first, last;
+    private int firstentry;
     private int count = 0;
     
     
@@ -24,9 +24,7 @@ public class Session {
         start = entry.getTime();
         end   = entry.getTime();
         
-        first = LogEntry.getEntryNumber();
-        last  = LogEntry.getEntryNumber();
-        
+        firstentry = LogEntry.getEntryNumber();
         count = 1;
     }
     
@@ -40,7 +38,6 @@ public class Session {
     {
         count += 1;
         end    = entry.getTime();
-        last   = LogEntry.getEntryNumber();
     }
     
     
@@ -72,14 +69,27 @@ public class Session {
     
     
     
-    /**
-     * Returns first and last entry numbers that correspond to current session
-     * @return first and last entry numbers
-     */
-    public int[] getEntryNumbers()
-    {
-        int[] numbers = {first, last};
-        return numbers;
-    }
+    public int getEntryNumber()
+    { return firstentry; }
     
+//    
+//    
+//    /**
+//     * Returns unique session identifier that consists of timestamp of user's last activity
+//     * and entry number that started the session
+//     * @return (last timestamp, first number) tuple
+//     */
+//    public Tuple<Calendar, Integer> getUniqueTupleStart()
+//    { return new Tuple<>(getStartTime(), firstentry); }
+//    
+//    
+//    
+//    /**
+//     * Returns unique session identifier that consists of timestamp of user's last activity
+//     * and entry number that started the session
+//     * @return (last timestamp, first number) tuple
+//     */
+//    public Tuple<Calendar, Integer> getUniqueTupleEnd()
+//    { return new Tuple<>(getEndTime(), firstentry); }
+//    
 }
