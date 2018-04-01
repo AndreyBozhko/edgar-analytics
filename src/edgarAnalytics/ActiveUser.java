@@ -5,12 +5,13 @@ import java.util.*;
 
 
 /**
- * Class that represents a user that has an active session and allows comparison by timestamp
+ * Class that represents a user that has an active session and allows comparison by timestamp and 
  */
 public class ActiveUser implements Comparable<ActiveUser> {
 
     private String   ip;
     private Calendar time;
+    private int      number;
     
     
     
@@ -20,8 +21,9 @@ public class ActiveUser implements Comparable<ActiveUser> {
      */
     public ActiveUser(LogEntry entry)
     {
-        ip   = entry.getIP();
-        time = entry.getTime();
+        this.ip   = entry.getIP();
+        this.time = entry.getTime();
+        this.number = LogEntry.getEntryNumber();
     }
     
     
@@ -58,15 +60,44 @@ public class ActiveUser implements Comparable<ActiveUser> {
     
     
     /**
-     * Implementation of Comparable interface. Two users are identical if they have equal IPs,
-     * otherwise the user with the earlier timestamp is "less" than the other user
+     * Returns the corresponding number of entry from the input file
+     * @return entry number
+     */
+    public int getNumber()
+    { return number; }
+    
+    
+    
+    /**
+     * Implementation of Comparable interface. Two users are identical if they have equal IPs and timestamps,
+     * otherwise the user with the earlier timestamp is "less" than the other user.
+     * If timestamps are also identical, the appearance order in the input file is used 
      */
     public int compareTo(ActiveUser that)
     {
-        if (this.ip.equals(that.getIP()))     return  0;
+        int cmp = this.time.compareTo(that.getTime()); 
+        if (cmp != 0) return cmp;
         
-        if (this.time.before(that.getTime())) return -1;
-        else                                  return +1;
+        return Integer.compare(this.number, that.getNumber());
+    }
+    
+    
+    
+    /**
+     * Implementation of {@code equals} interface. Two users are identical if they have equal IPs
+     * and their timestamps represent the same moment of time
+     */
+    @Override
+    public boolean equals(Object o)
+    {
+        if (this == o) return true;
+        
+        if (!(o instanceof ActiveUser)) return false;
+        ActiveUser that = (ActiveUser) o;
+        
+        return (this.ip.equals(that.getIP())
+                && this.time.compareTo(that.getTime()) == 0
+                && this.number == that.getNumber());
     }
     
 }

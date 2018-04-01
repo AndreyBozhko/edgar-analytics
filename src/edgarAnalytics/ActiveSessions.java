@@ -12,8 +12,10 @@ public class ActiveSessions {
     private final int inact_time;
     private Calendar  current;
     
-    private TreeSet<ActiveUser>         active_users;
-    private final Map<String, Session>  user_sessions;
+    private final Map<Order, TreeSet<ActiveUser>> active_users;
+    private final Map<String, Session>            user_sessions;
+    
+    public static enum Order {BY_FIRST, BY_LAST};
     
             
     
@@ -24,8 +26,11 @@ public class ActiveSessions {
     public ActiveSessions(int time)
     {
         inact_time    = time;
-        active_users  = new TreeSet<>();
         user_sessions = new HashMap<>();
+        active_users  = new HashMap<>();
+        
+        for (Order o : Order.values())
+            active_users.put(o, new TreeSet<>());
     }
     
     
@@ -45,35 +50,41 @@ public class ActiveSessions {
      */
     public void add(LogEntry entry)
     {
-        String ip = entry.getIP();
-        
         // if user is still active
-        if (user_sessions.containsKey(ip))
+        if (user_sessions.containsKey(entry.getIP()))
         {
-            // update his last event timestamp
-            ActiveUser existing_user = new ActiveUser(ip, user_sessions.get(ip).getEndTime());
-            active_users.remove(existing_user);
-            
-            // and process new webpage request
-            user_sessions.get(ip).addVisitedWebpage(entry);
+            // process new webpage request
+            user_sessions.get(entry.getIP()).addVisitedWebpage(entry);
         }
         else
         {
             // otherwise start a new session record
-            user_sessions.put(ip, new Session(entry));
+            user_sessions.put(entry.getIP(), new Session(entry));
+            
+            // add user event into the collection that would contain data about user's first event, sorted by date
+            // also, some redundant event data may be added
+            active_users.get(Order.BY_FIRST).add(new ActiveUser(entry));
         }
-
-        active_users.add(new ActiveUser(entry));
+        
+        // add user event into the collection that would contain data about user's last event, sorted by date
+        // also, some redundant event data may be added
+        active_users.get(Order.BY_LAST).add(new ActiveUser(entry));
     }
     
     
     
     /**
-     * Returns true if not all the sessions are finalized
+     * Returns true if not all the sessions are finalized after the input file ends
      * @return {@code true} if there still are sessions to finalize
      */
-    public boolean hasSessions()
-    { return (!active_users.isEmpty()); }
+    public boolean hasSessionsToFinalize()
+    {
+        if (user_sessions.isEmpty()) return false;
+        
+        getNextUser(Order.BY_FIRST);
+        
+        return (!active_users.get(Order.BY_FIRST).isEmpty());
+    }
     
     
     
@@ -83,30 +94,59 @@ public class ActiveSessions {
      */
     public boolean hasExpiredSessions()
     {
-        if (!hasSessions()) return false;
+        if (user_sessions.isEmpty()) return false;
         
-        String ip = active_users.first().getIP();
+        ActiveUser user = getNextUser(Order.BY_LAST);
         
-        return (getDuration(current, user_sessions.get(ip).getEndTime()) > inact_time);
+        return (getDuration(current, user.getTime()) > inact_time);
     }
     
     
     
     /**
-     * Finalize a session and produce an output string
+     * Finds next valid user whose session is to be finalized
+     * @param order referes to collection from which user is to be selected
+     * @return user
+     */
+    private ActiveUser getNextUser(Order order)
+    {
+        ActiveUser user = active_users.get(order).first();
+        
+        while (!(user_sessions.containsKey(user.getIP())
+                && user_sessions.get(user.getIP())
+                                .getEntryNumbers()[order.ordinal()]
+                                 == user.getNumber()))
+        {
+            active_users.get(order).pollFirst();
+            user = active_users.get(order).first();
+        }
+        
+        return user;
+    }
+    
+    
+    
+    /**
+     * Method that closes the next session from the collection ordered by Order order
+     * and produces an output string
+     * @param order sorting order of collection, based on which the next session to be closed is chosen
      * @return output string
      */
-    public String closeSession()
+    public String closeSession(Order order)
     {
-        String ip = active_users.pollFirst().getIP();
+        // get session info
+        ActiveUser user = active_users.get(order).pollFirst();
+        String ip = user.getIP();
         
         Calendar start = user_sessions.get(ip).getStartTime();
         Calendar end   = user_sessions.get(ip).getEndTime();
         int duration   = getDuration(start, end);
         int count      = user_sessions.get(ip).getWebpageCount();
         
+        // remove user from active sessions collection
         user_sessions.remove(ip);
         
+        // create output string
         StringJoiner output = new StringJoiner(",");
         
         output.add(ip)
@@ -116,24 +156,6 @@ public class ActiveSessions {
               .add(Integer.toString(count));
         
         return output.toString();
-    }
-    
-    
-    
-    /**
-     * In order to finalize all remaining sessions when the end of input file is reached,
-     * the sessions must be sorted by their initial timestamp
-     */
-    public void reorderSessionsByStartTime()
-    {
-        TreeSet<ActiveUser> temp = new TreeSet<>();
-        while (!active_users.isEmpty())
-        {
-            String ip = active_users.pollFirst().getIP();
-            ActiveUser user = new ActiveUser(ip, user_sessions.get(ip).getStartTime());
-            temp.add(user);
-        }
-        active_users = temp;
     }
     
     
@@ -171,5 +193,5 @@ public class ActiveSessions {
      */
     private static int getDuration(Calendar c1, Calendar c2)
     { return (int) Math.abs(c1.getTimeInMillis() - c2.getTimeInMillis()) / 1000; }
-    
+
 }

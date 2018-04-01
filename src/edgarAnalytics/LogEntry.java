@@ -13,6 +13,7 @@ public class LogEntry {
 
     // String[] field_names = {"ip", "date", "time", "cik", "accession", "extension"};
     private static Map<String, Integer> positions;
+    private static int entry_number;
     
     private final String[] fields;
     private final String   ip, webpage;
@@ -33,6 +34,8 @@ public class LogEntry {
         ip = parseIP();
         datetime = parseDateTime();
         webpage = parseWebpage();
+        
+        entry_number += 1;
     }
     
     
@@ -43,6 +46,8 @@ public class LogEntry {
      */
     public static void initialize(String header)
     {
+        entry_number = 0;
+        
         String[] headers = header.split(",", -1);
         positions = new HashMap<>();
         
@@ -69,13 +74,11 @@ public class LogEntry {
     private Calendar parseDateTime() throws Exception
     {
         Calendar datetime = Calendar.getInstance();
-        datetime.setLenient(false);
-        
+                
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ENGLISH);
         sdf.setLenient(false);
-        
         datetime.setTime(sdf.parse(fields[positions.get("date")] + " " + fields[positions.get("time")]));
-        
+
         return (Calendar) datetime.clone();
     }
 
@@ -123,4 +126,13 @@ public class LogEntry {
     public String getWebpage()
     { return webpage; }
 
+    
+    
+    /**
+     * Returns the total number of entries read so far
+     * @return number of entries
+     */
+    public static int getEntryNumber()
+    { return entry_number; }
+    
 }

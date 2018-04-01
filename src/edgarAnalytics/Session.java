@@ -10,6 +10,7 @@ import java.util.*;
 public class Session {
 
     private Calendar start, end;
+    private int first, last;
     private int count = 0;
     
     
@@ -23,6 +24,9 @@ public class Session {
         start = entry.getTime();
         end   = entry.getTime();
         
+        first = LogEntry.getEntryNumber();
+        last  = LogEntry.getEntryNumber();
+        
         count = 1;
     }
     
@@ -35,7 +39,8 @@ public class Session {
     public void addVisitedWebpage(LogEntry entry)
     {
         count += 1;
-        end = entry.getTime();
+        end    = entry.getTime();
+        last   = LogEntry.getEntryNumber();
     }
     
     
@@ -64,5 +69,17 @@ public class Session {
      */
     public int getWebpageCount()
     { return count; }
+    
+    
+    
+    /**
+     * Returns first and last entry numbers that correspond to current session
+     * @return first and last entry numbers
+     */
+    public int[] getEntryNumbers()
+    {
+        int[] numbers = {first, last};
+        return numbers;
+    }
     
 }
