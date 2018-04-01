@@ -1,7 +1,6 @@
 package edgarAnalytics;
 
 import java.util.*;
-import java.text.SimpleDateFormat;
 
 
 
@@ -102,7 +101,7 @@ public class ActiveSessions {
         if (user_sessions.isEmpty()) return false;
         
         String ip = active_users.get(Order.BY_LAST).firstEntry().getValue();
-        return (getDuration(current, user_sessions.get(ip).getEndTime()) > inact_time);
+        return (user_sessions.get(ip).getDuration(current) > inact_time);
     }
     
     
@@ -117,14 +116,8 @@ public class ActiveSessions {
     {
         // get session info
         String ip = active_users.get(order).firstEntry().getValue();
-
-        Session sess   = user_sessions.get(ip);
         
-        int count      = sess.getWebpageCount();
-        Calendar start = sess.getStartTime();
-        Calendar end   = sess.getEndTime();
-        int duration   = getDuration(start, end);
-        
+        Session sess = user_sessions.get(ip);
         
         // remove user from active sessions collection
         for (Order o : Order.values())
@@ -132,42 +125,8 @@ public class ActiveSessions {
         
         user_sessions.remove(ip);
         
-        
-        // create output string
-        StringJoiner output = new StringJoiner(",");
-        
-        output.add(ip)
-              .add(calendarToString(start))
-              .add(calendarToString(end))
-              .add(Integer.toString(duration + 1))
-              .add(Integer.toString(count));
-        
-        return output.toString();
+        return ip + "," + sess.toString();
     }
-    
-    
-    
-    /**
-     * Method that converts Calendar instance into String
-     * @param cal timestamp
-     * @return timestamp as a string
-     */
-    private static String calendarToString(Calendar cal)
-    {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        return sdf.format(cal.getTime());
-    }
-    
-    
-    
-    /**
-     * Method that calculates time period in seconds between two timestamps
-     * @param c1 first timestamp
-     * @param c2 second timestamp
-     * @return period between timestamps
-     */
-    private static int getDuration(Calendar c1, Calendar c2)
-    { return (int) Math.abs(c1.getTimeInMillis() - c2.getTimeInMillis()) / 1000; }
 
     
     
