@@ -1,5 +1,5 @@
 # edgar-analytics
-My solution to the Insight Data Engineering Coding Competition (https://github.com/InsightDataScience/edgar-analytics).
+My solution to the Insight Data Engineering Coding Competition https://github.com/InsightDataScience/edgar-analytics (*accepted*).
 
 ## Executing the project
 The solution is written in Java and the source files are compiled using the `javac` compiler from the package `openjdk-9-jdk-headless`.
